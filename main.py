@@ -17,6 +17,44 @@ def get_db():
     finally:
         db.close()
 
+from fastapi.responses import HTMLResponse
+
+@app.get('/', response_class=HTMLResponse)
+def hello():
+    return """
+    <html>
+        <head>
+            <title>News Analyzer API</title>
+            <style>
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+                    display: flex; align-items: center; justify-content: center; 
+                    height: 100vh; margin: 0; background: #f0f2f5; color: #1c1e21;
+                }
+                .card { 
+                    background: white; padding: 2rem; border-radius: 12px; 
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 400px; text-align: center;
+                }
+                h1 { color: #0070f3; margin-bottom: 10px; }
+                p { line-height: 1.5; color: #666; }
+                .status { 
+                    display: inline-block; padding: 4px 12px; background: #e7f5ed; 
+                    color: #0ca678; border-radius: 20px; font-size: 0.8rem; font-weight: bold;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="status">● System Online</div>
+                <h1>News Analyzer</h1>
+                <p>An AI-powered engine that analyzes news and categorizes it into meaningful insights.</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                <small style="color: #999;">v1.0.0 • Powered by Gemini AI</small>
+            </div>
+        </body>
+    </html>
+    """
+
 @app.get('/news')
 def get_news(db : Session = Depends(get_db)):
     db_products = db.query(News).all()
