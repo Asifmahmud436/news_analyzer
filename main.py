@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from database import engine, SessionLocal, Base
 from models import News,User
 from schema import NewsCreate, NewsResponse, UserCreate, UserOut
@@ -6,11 +6,8 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from ai import get_news_category
 from jose import jwt,JWTError
-from .auth import SECRET_KEY, ALGORITHM, verify_password, create_access_token
-from .crud import create_user
-
-News.__table__.create(bind=engine, checkfirst=True)
-User.__table__.create(bind=engine, checkfirst=True)
+from auth import SECRET_KEY, ALGORITHM, verify_password, create_access_token
+from crud import create_user
 
 app = FastAPI()
 
@@ -32,9 +29,9 @@ def get_current_user(token: str, db: Session):
 
     user = db.query(User).get(user_id)
     if not user:
-        raise HTTPException(status_code=401)
+        raise HTTPException(status_code=401, detail="User not found")
 
-    return User
+    return user
 
 @app.get('/', response_class=HTMLResponse)
 def hello():
@@ -79,8 +76,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 @app.post("/login")
 def login(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter_by(email=user.email).first()
-    if not verify_password(user.password, db_user.hashed_password):
-        return {"error": "Invalid credentials"}
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid Credentials")
 
     token = create_access_token({"sub": db_user.id})
     return {"access_token": token}
@@ -99,7 +96,7 @@ def get_a_news(news_id : int, db : Session = Depends(get_db)):
 
 @app.post("/news", response_model=NewsResponse)
 def add_news(news: NewsCreate, db : Session = Depends(get_db)):
-    db_item = News(headline = news.headline, body = news.body)
+    db_item = News(headline = news.headline, body = news.body, countries= news.coutries, created_at = news.created_at)
     db_item.categories = get_news_category(db_item.body)
     db.add(db_item)
     db.commit()
@@ -113,12 +110,13 @@ def update_news(news_id : int,given_news: NewsCreate ,db : Session = Depends(get
         db_product.body = given_news.body
         db_product.headline = given_news.headline
         db_product.categories = given_news.categories
+        db_product.countries = given_news.countries
         db.commit()
         return "Product added successfully"
     else:
         raise HTTPException(status_code=404, detail='Product not found')
 
-@app.delete("/news")
+@app.delete("/news/{id}")
 def delete_product(id: int, db: Session = Depends(get_db)):
     db_product = db.query(News).filter(News.id==id).first()
     if db_product:

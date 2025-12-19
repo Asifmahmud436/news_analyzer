@@ -5,6 +5,8 @@ from typing import List
 class NewsBase(BaseModel):
     headline: str
     body : str
+    countries : str
+    created_at : datetime
     
 class NewsCreate(NewsBase):
     pass
