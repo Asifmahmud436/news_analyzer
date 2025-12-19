@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
-from database import engine, SessionLocal, Base
+from database import SessionLocal 
 from models import News,User
 from schema import NewsCreate, NewsResponse, UserCreate, UserOut
 from sqlalchemy.orm import Session
@@ -62,6 +62,7 @@ def hello():
                 <div class="status">● System Online</div>
                 <h1>News Analyzer</h1>
                 <p>An AI-powered engine that analyzes news and categorizes it into meaningful insights.</p>
+                <p>Go to /docs for all the endpoints</p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                 <small style="color: #999;">v1.0.0 • Powered by Gemini AI</small>
             </div>
@@ -91,6 +92,9 @@ def get_news(db : Session = Depends(get_db)):
 def get_a_news(news_id : int, db : Session = Depends(get_db)):
     db_news = db.query(News).filter(News.id == news_id).first()
     if db_news:
+        db_news.views = db_news.views + 1
+        db.commit()
+        db.refresh(db_news)
         return db_news
     raise HTTPException(status_code=404,detail="News not found")
 

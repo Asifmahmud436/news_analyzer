@@ -14,6 +14,7 @@ class NewsCreate(NewsBase):
 class NewsResponse(NewsBase):
     id : int
     categories : List[str]
+    views : int
     created_at : datetime
     updated_at : datetime
     class Config:
