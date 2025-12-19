@@ -121,7 +121,7 @@ def update_news(news_id : int,given_news: NewsCreate ,db : Session = Depends(get
         raise HTTPException(status_code=404, detail='Product not found')
 
 @app.delete("/news/{id}")
-def delete_product(id: int, db: Session = Depends(get_db)):
+def delete_news(id: int, db: Session = Depends(get_db)):
     db_product = db.query(News).filter(News.id==id).first()
     if db_product:
         db.delete(db_product)
