@@ -1,14 +1,17 @@
 from fastapi import FastAPI, Depends, HTTPException
-from database import engine, SessionLocal
-from models import News
-from schema import NewsBase, NewsCreate, NewsResponse
+from database import engine, SessionLocal, Base
+from models import News,User
+from schema import NewsCreate, NewsResponse, UserCreate, UserOut
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from ai import get_news_category
-
-app = FastAPI()
+from jose import jwt,JWTError
+from .auth import SECRET_KEY, ALGORITHM
 
 News.__table__.create(bind=engine, checkfirst=True)
+User.__table__.create(bind=engine, checkfirst=True)
+
+app = FastAPI()
 
 def get_db():
     db = SessionLocal()
@@ -18,6 +21,19 @@ def get_db():
         db.close()
 
 from fastapi.responses import HTMLResponse
+
+def get_current_user(token: str, db: Session):
+    try: 
+        payload = jwt.decode(token , SECRET_KEY,algorithms=ALGORITHM)
+        user_id = payload.get('sub')
+    except JWTError:
+        raise HTTPException(status_code=401)
+
+    user = db.query(User).get(user_id)
+    if not user:
+        raise HTTPException(status_code=401)
+
+    return User
 
 @app.get('/', response_class=HTMLResponse)
 def hello():
@@ -54,6 +70,10 @@ def hello():
         </body>
     </html>
     """
+
+@app.post("/register", response_model=UserOut)
+def register(user: UserCreate, db: Session = Depends(get_db)):
+    return 
 
 @app.get('/news')
 def get_news(db : Session = Depends(get_db)):
