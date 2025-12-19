@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from ai import get_news_category
 from jose import jwt,JWTError
-from .auth import SECRET_KEY, ALGORITHM
+from .auth import SECRET_KEY, ALGORITHM, verify_password, create_access_token
+from .crud import create_user
 
 News.__table__.create(bind=engine, checkfirst=True)
 User.__table__.create(bind=engine, checkfirst=True)
@@ -73,7 +74,16 @@ def hello():
 
 @app.post("/register", response_model=UserOut)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    return 
+    return create_user(db, user.email, user.password)
+
+@app.post("/login")
+def login(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter_by(email=user.email).first()
+    if not verify_password(user.password, db_user.hashed_password):
+        return {"error": "Invalid credentials"}
+
+    token = create_access_token({"sub": db_user.id})
+    return {"access_token": token}
 
 @app.get('/news')
 def get_news(db : Session = Depends(get_db)):
