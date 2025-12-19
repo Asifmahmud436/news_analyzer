@@ -11,6 +11,20 @@ from crud import create_user
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:3000",    # React default
+    "http://localhost:5173",    # Vite default
+    "https://your-app.vercel.app" # Production frontend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
+
 def get_db():
     db = SessionLocal()
     try:
@@ -132,16 +146,3 @@ def delete_news(id: int, db: Session = Depends(get_db)):
 
 
 
-origins = [
-    "http://localhost:3000",    # React default
-    "http://localhost:5173",    # Vite default
-    "https://your-app.vercel.app" # Production frontend
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
-)
