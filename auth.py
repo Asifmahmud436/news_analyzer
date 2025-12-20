@@ -3,21 +3,26 @@ from jose import jwt
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
-load_dotenv
+load_dotenv()
+import hashlib
 
 SECRET_KEY = os.getenv("SECRET_KEY") 
 ALGORITHM = "HS256"
 
-pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+pwd_context = CryptContext(
+    schemes=["bcrypt_sha256"],  # ⭐ CHANGED
+    deprecated="auto"
+)
 
-def hash_password(password:str):
+def hash_password(password: str):
     return pwd_context.hash(password)
 
-def verify_password(password, hashed):
+def verify_password(password: str, hashed: str):
     return pwd_context.verify(password, hashed)
+
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=30)
+    expire = datetime.now() + timedelta(minutes=30)
     to_encode.update({'exp':expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

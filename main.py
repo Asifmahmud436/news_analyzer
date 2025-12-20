@@ -102,19 +102,27 @@ def get_news(db : Session = Depends(get_db)):
     db_products = db.query(News).all()
     return db_products
 
+# 1. Clean up the GET endpoint
 @app.get("/news/{news_id}")
 def get_a_news(news_id : int, db : Session = Depends(get_db)):
     db_news = db.query(News).filter(News.id == news_id).first()
+    if not db_news:
+        raise HTTPException(status_code=404, detail="News not found")
+    return db_news
+
+# 2. Add a dedicated "Hit" endpoint
+@app.post("/news/{news_id}/view")
+def increment_view(news_id: int, db: Session = Depends(get_db)):
+    db_news = db.query(News).filter(News.id == news_id).first()
     if db_news:
-        db_news.views = db_news.views + 1
+        db_news.views += 1
         db.commit()
-        db.refresh(db_news)
-        return db_news
-    raise HTTPException(status_code=404,detail="News not found")
+        return {"status": "success", "current_views": db_news.views}
+    raise HTTPException(status_code=404)
 
 @app.post("/news", response_model=NewsResponse)
 def add_news(news: NewsCreate, db : Session = Depends(get_db)):
-    db_item = News(headline = news.headline, body = news.body, countries= news.coutries, created_at = news.created_at)
+    db_item = News(headline = news.headline, body = news.body, countries= news.countries, created_at = news.created_at)
     db_item.categories = get_news_category(db_item.body)
     db.add(db_item)
     db.commit()
