@@ -152,6 +152,4 @@ def delete_news(id: int, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=404, detail="Product not found")
 
-
-
-handler = app
+application = app
