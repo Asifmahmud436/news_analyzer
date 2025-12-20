@@ -14,7 +14,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",    # React default
     "http://localhost:5173",    # Vite default
-    "https://ai-news-analyzer-one.vercel.app/" # Production frontend
+    "https://ai-news-analyzer-one.vercel.app" # Production frontend
 ]
 
 app.add_middleware(
