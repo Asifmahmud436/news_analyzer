@@ -14,7 +14,8 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",    # React default
     "http://localhost:5173",    # Vite default
-    "https://ai-news-analyzer-one.vercel.app" # Production frontend
+    "https://ai-news-analyzer-one.vercel.app", # Production frontend
+    "*"
 ]
 
 app.add_middleware(
@@ -36,7 +37,7 @@ from fastapi.responses import HTMLResponse
 
 def get_current_user(token: str, db: Session):
     try: 
-        payload = jwt.decode(token , SECRET_KEY,algorithms=ALGORITHM)
+        payload = jwt.decode(token , SECRET_KEY,algorithms=[ALGORITHM])
         user_id = payload.get('sub')
     except JWTError:
         raise HTTPException(status_code=401)
