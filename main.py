@@ -14,15 +14,15 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://ai-news-analyzer-one.vercel.app"  
+    "https://ai-news-analyzer-one.vercel.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allow_headers=['Content-Type', 'Authorization', 'Accept'],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def get_db():
