@@ -15,7 +15,7 @@ origins = [
     "http://localhost:3000",
     "http://localhost:5173",
     "https://ai-news-analyzer-one.vercel.app",
-    "https://daily-positive-news1.vercel.app/",
+    "https://daily-positive-news1.vercel.app",
     
 ]
 
